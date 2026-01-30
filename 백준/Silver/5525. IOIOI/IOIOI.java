@@ -9,26 +9,26 @@ public class Main {
         int n = Integer.parseInt(br.readLine());
         int m = Integer.parseInt(br.readLine());
         String s = br.readLine();
-
-        // [2단계] pn 문자열 만들기
-        StringBuilder sb = new StringBuilder();
-        sb.append('I');
-        for (int i = 0; i < n; i++) {
-            sb.append("OI");
-        }
-        String pn = sb.toString();
-        int pnSize = sb.length();
-
-        // [3단계] 슬라이딩 윈도우
+        
+        // [2단계] 슬라이딩 윈도우
         int count = 0;
-        for (int i = 0; i < m - (pnSize - 1); i++) {
-            String subString = s.substring(i, i + pnSize);
-            if (subString.equals(pn)) {
+        int match = 0;
+        for (int i = 1; i < m - 1; i++) {
+            boolean isMatched = s.charAt(i - 1) == 'I' && s.charAt(i) == 'O' && s.charAt(i + 1) == 'I';
+
+            if (!isMatched) {
+                match = 0;
+                continue;
+            }
+
+            match++;
+            if (match >= n) {
                 count++;
             }
+            i++;
         }
 
-        // [4단계] 출력
+        // [3단계] 출력
         System.out.println(count);
     }
 }
