@@ -8,42 +8,41 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int n = Integer.parseInt(br.readLine());
 
-        int[][] scores = new int[n + 1][3];
-        for (int i = 1; i <= n; i++) {
+        int[] maxDp = new int[3];
+        int[] minDp = new int[3];
+
+        for (int i = 0; i < n; i++) {
             StringTokenizer st = new StringTokenizer(br.readLine());
-            scores[i][0] = Integer.parseInt(st.nextToken());
-            scores[i][1] = Integer.parseInt(st.nextToken());
-            scores[i][2] = Integer.parseInt(st.nextToken());
+            int a = Integer.parseInt(st.nextToken());
+            int b = Integer.parseInt(st.nextToken());
+            int c = Integer.parseInt(st.nextToken());
+
+            if (i == 0) {
+                maxDp[0] = minDp[0] = a;
+                maxDp[1] = minDp[1] = b;
+                maxDp[2] = minDp[2] = c;
+                continue;
+            }
+
+            int prevMax0 = maxDp[0], prevMax1 = maxDp[1], prevMax2 = maxDp[2];
+            int prevMin0 = minDp[0], prevMin1 = minDp[1], prevMin2 = minDp[2];
+
+            // 최댓값 갱신
+            maxDp[0] = a + Math.max(prevMax0, prevMax1);
+            maxDp[1] = b + Math.max(prevMax0, Math.max(prevMax1, prevMax2));
+            maxDp[2] = c + Math.max(prevMax1, prevMax2);
+
+            // 최솟값 갱신
+            minDp[0] = a + Math.min(prevMin0, prevMin1);
+            minDp[1] = b + Math.min(prevMin0, Math.min(prevMin1, prevMin2));
+            minDp[2] = c + Math.min(prevMin1, prevMin2);
         }
 
-        int[][] maxDp = new int[n + 1][3];
-        int[][] minDp = new int[n + 1][3];
+        // 결과 산출
+        int finalMax = Math.max(maxDp[0], Math.max(maxDp[1], maxDp[2]));
+        int finalMin = Math.min(minDp[0], Math.min(minDp[1], minDp[2]));
 
-        for (int i = 1; i <= n; i++) {
-            int leftMax = Math.max(maxDp[i - 1][0], maxDp[i - 1][1]);
-            int rightMax = Math.max(maxDp[i - 1][1], maxDp[i - 1][2]);
-            int finalMax = Math.max(leftMax, rightMax);
-            maxDp[i][0] = scores[i][0] + leftMax;
-            maxDp[i][1] = scores[i][1] + finalMax;
-            maxDp[i][2] = scores[i][2] + rightMax;
-
-            int leftMin = Math.min(minDp[i - 1][0], minDp[i - 1][1]);
-            int rightMin = Math.min(minDp[i - 1][1], minDp[i - 1][2]);
-            int finalMin = Math.min(leftMin, rightMin);
-            minDp[i][0] = scores[i][0] + leftMin;
-            minDp[i][1] = scores[i][1] + finalMin;
-            minDp[i][2] = scores[i][2] + rightMin;
-        }
-
-        int leftMax = Math.max(maxDp[n][0], maxDp[n][1]);
-        int rightMax = Math.max(maxDp[n][1], maxDp[n][2]);
-        int finalMax = Math.max(leftMax, rightMax);
-
-        int leftMin = Math.min(minDp[n][0], minDp[n][1]);
-        int rightMin = Math.min(minDp[n][1], minDp[n][2]);
-        int finalMin = Math.min(leftMin, rightMin);
-
-        System.out.print(finalMax + " " + finalMin);
+        System.out.println(finalMax + " " + finalMin);
         br.close();
     }
 }
