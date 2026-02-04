@@ -1,11 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -17,70 +13,69 @@ public class Main {
 
         st = new StringTokenizer(br.readLine());
         int l = Integer.parseInt(st.nextToken());
-        Set<Integer> truePeople = new HashSet<>();
-        for (int i = 0; i < l; i++) {
-            truePeople.add(Integer.parseInt(st.nextToken()));
+
+        // 진실을 아는 사람이 없는 경우
+        if (l == 0) {
+            System.out.print(m);
+            return;
         }
 
-        boolean[][] adj = new boolean[n + 1][n + 1];
-        List<Set<Integer>> partyPeople = new ArrayList<>(m);
+        Queue<Integer> queue = new LinkedList<>();
+        boolean[] knowsTruth = new boolean[n + 1];
+        for (int i = 0; i < l; i++) {
+            int person = Integer.parseInt(st.nextToken());
+            knowsTruth[person] = true;
+            queue.offer(person);
+        }
+        
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i <= n; i++) {
+            adj.add(new ArrayList<>());
+        }
+
+        List<int[]> parties = new ArrayList<>();
         for (int i = 0; i < m; i++) {
             st = new StringTokenizer(br.readLine());
             int count = Integer.parseInt(st.nextToken());
             int[] attendance = new int[count];
-            Set<Integer> set = new HashSet<>();
-
-            // 파티 참여자 기록
             for (int j = 0; j < count; j++) {
                 attendance[j] = Integer.parseInt(st.nextToken());
-                set.add(attendance[j]);
             }
-            partyPeople.add(set);
+            parties.add(attendance);
 
-            // 인접행렬 구성
+            // 파티 참석자들끼리 서로 연결
             for (int j = 0; j < count; j++) {
                 for (int k = j + 1; k < count; k++) {
-                    adj[attendance[j]][attendance[k]] = true;
-                    adj[attendance[k]][attendance[j]] = true;
+                    adj.get(attendance[j]).add(attendance[k]);
+                    adj.get(attendance[k]).add(attendance[j]);
                 }
             }
         }
 
-        // 플로이드-워셜
-        for (int k = 1; k <= n; k++) {
-            for (int i = 1; i <= n; i++) {
-                for (int j = 1; j <= n; j++) {
-                    if (adj[i][k] && adj[k][j]) {
-                        adj[i][j] = true;
-                    }
+        // BFS: 진실 전파 시작
+        while (!queue.isEmpty()) {
+            int curr = queue.poll();
+            for (int next : adj.get(curr)) {
+                if (!knowsTruth[next]) {
+                    knowsTruth[next] = true;
+                    queue.offer(next);
                 }
             }
         }
 
-        Set<Integer> newTruePeople = new HashSet<>(truePeople);
-        for (int truePerson : truePeople) {
-            for (int i = 1; i <= n; i++) {
-                if (adj[truePerson][i]) {
-                    newTruePeople.add(i);
-                }
-            }
-        }
-
-        int count = 0;
-        for (Set<Integer> attendance : partyPeople) {
-            boolean flag = true;
-            for (int truePerson : newTruePeople) {
-                if (attendance.contains(truePerson)) {
-                    flag = false;
+        // 결과 계산
+        int result = 0;
+        for (int[] attendance : parties) {
+            boolean canLie = true;
+            for (int person : attendance) {
+                if (knowsTruth[person]) {
+                    canLie = false;
                     break;
                 }
             }
-            if (flag) {
-                count++;
-            }
+            if (canLie) result++;
         }
 
-        System.out.print(count);
-        br.close();
+        System.out.print(result);
     }
 }
